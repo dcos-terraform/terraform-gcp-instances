@@ -43,7 +43,7 @@ locals {
 
 module "dcos-tested-oses" {
   source  = "dcos-terraform/tested-oses/gcp"
-  version = "~> 0.1.0"
+  version = "~> 0.1"
 
   providers = {
     google = "google"
