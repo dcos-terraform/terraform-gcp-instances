@@ -8,7 +8,7 @@ Creates generic instances for DC/OS nodes
 ```hcl
 module "masters" {
   source  = "dcos-terraform/instance/gcp"
-  version = "~> 0.1.0"
+  version = "~> 0.2.0"
 
   providers = {
     google = "google"
@@ -68,7 +68,7 @@ module "masters" {
 | instance_subnetwork_name | Instance Subnetwork Name |
 | instances_self_link | List of instance self links |
 | machine_type | Instance Type |
-| name_prefix | Cluster Name |
+| name_prefix | Name Prefix |
 | num_instances | How many instances should be created |
 | prereq_id | Prereq id used for dependency |
 | private_ips | List of private ip addresses created by this module |

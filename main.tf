@@ -9,7 +9,7 @@
  *```hcl
  * module "masters" {
  *   source  = "dcos-terraform/instance/gcp"
- *   version = "~> 0.1.0"
+ *   version = "~> 0.2.0"
  *
  *   providers = {
  *     google = "google"
@@ -32,7 +32,9 @@
  *```
  */
 
-provider "google" {}
+provider "google" {
+  version = "~> 2.0"
+}
 
 data "google_client_config" "current" {}
 
@@ -105,7 +107,7 @@ resource "null_resource" "instance-prereq" {
   count = "${var.image == "" ? var.num_instances : 0}"
 
   connection {
-    host        = "${element(google_compute_instance.instances.*.network_interface.0.access_config.0.assigned_nat_ip, count.index)}"
+    host        = "${element(google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip, count.index)}"
     user        = "${coalesce(var.ssh_user, module.dcos-tested-oses.user)}"
     private_key = "${local.private_key}"
     agent       = "${local.agent}"

@@ -4,7 +4,7 @@ output "num_instances" {
 }
 
 output "name_prefix" {
-  description = "Cluster Name"
+  description = "Name Prefix"
   value       = "${var.cluster_name}"
 }
 
@@ -75,7 +75,7 @@ output "private_ips" {
 
 output "public_ips" {
   description = "List of public ip addresses created by this module"
-  value       = ["${google_compute_instance.instances.*.network_interface.0.access_config.0.assigned_nat_ip}"]
+  value       = ["${google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip}"]
 }
 
 output "instances_self_link" {
