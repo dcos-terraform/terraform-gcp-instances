@@ -87,7 +87,7 @@ resource "google_compute_instance" "instances" {
 
   metadata = {
     user-data = "${var.user_data}"
-    sshKeys   = "${coalesce(var.ssh_user, module.dcos-tested-oses.user)}:${file(var.public_ssh_key)}"
+    sshKeys   = "${coalesce(var.ssh_user, module.dcos-tested-oses.user)}:${var.public_ssh_key}"
   }
 
   lifecycle {
