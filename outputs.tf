@@ -70,12 +70,12 @@ output "allow_stopping_for_update" {
 
 output "private_ips" {
   description = "List of private ip addresses created by this module"
-  value       = ["${google_compute_instance.instances.*.network_interface.0.address}"]
+  value       = ["${google_compute_instance.instances.*.network_interface.0.network_ip}"]
 }
 
 output "public_ips" {
   description = "List of public ip addresses created by this module"
-  value       = ["${google_compute_instance.instances.*.network_interface.0.access_config.0.assigned_nat_ip}"]
+  value       = ["${google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip}"]
 }
 
 output "instances_self_link" {

@@ -12,7 +12,7 @@
  *   version = "~> 0.1.0"
  *
  *   providers = {
- *     google = "google"
+ *     google-beta = "google-beta"
  *   }
  *
  *   cluster_name             = "${var.cluster_name}"
@@ -32,9 +32,11 @@
  *```
  */
 
-provider "google" {}
+provider "google-beta" {}
 
-data "google_client_config" "current" {}
+data "google_client_config" "current" {
+  provider = "google-beta"
+}
 
 locals {
   private_key = "${file(var.ssh_private_key_filename)}"
@@ -46,7 +48,7 @@ module "dcos-tested-oses" {
   version = "~> 0.1.0"
 
   providers = {
-    google = "google"
+    google-beta = "google-beta"
   }
 
   os           = "${var.dcos_instance_os}"
@@ -98,6 +100,8 @@ resource "google_compute_instance" "instances" {
     preemptible       = "${var.scheduling_preemptible}"
     automatic_restart = "false"
   }
+
+  provider = "google-beta"
 }
 
 resource "null_resource" "instance-prereq" {
@@ -105,7 +109,7 @@ resource "null_resource" "instance-prereq" {
   count = "${var.image == "" ? var.num_instances : 0}"
 
   connection {
-    host        = "${element(google_compute_instance.instances.*.network_interface.0.access_config.0.assigned_nat_ip, count.index)}"
+    host        = "${element(google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip, count.index)}"
     user        = "${coalesce(var.ssh_user, module.dcos-tested-oses.user)}"
     private_key = "${local.private_key}"
     agent       = "${local.agent}"
