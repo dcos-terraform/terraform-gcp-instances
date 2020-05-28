@@ -38,74 +38,103 @@ data "google_client_config" "current" {}
 
 // If name_prefix exists, merge it into the cluster_name
 locals {
-  cluster_name        = "${var.name_prefix != "" ? "${var.name_prefix}-${var.cluster_name}" : var.cluster_name}"
-  private_key         = "${file(var.ssh_private_key_filename)}"
-  agent               = "${var.ssh_private_key_filename == "/dev/null" ? true : false}"
-  on_host_maintenance = "${var.guest_accelerator_count > 0 ? "TERMINATE" : "MIGRATE"}"
+  cluster_name        = var.name_prefix != "" ? "${var.name_prefix}-${var.cluster_name}" : var.cluster_name
+  private_key         = file(var.ssh_private_key_filename)
+  agent               = var.ssh_private_key_filename == "/dev/null" ? true : false
+  on_host_maintenance = var.guest_accelerator_count > 0 ? "TERMINATE" : "MIGRATE"
 }
 
 module "dcos-tested-oses" {
   source  = "dcos-terraform/tested-oses/gcp"
-  version = "~> 0.2.0"
+  version = "~> 0.3.0"
 
   providers = {
-    google = "google"
+    google = google
   }
 
-  os = "${var.dcos_instance_os}"
+  os = var.dcos_instance_os
 }
 
 resource "google_compute_instance" "instances" {
-  count                     = "${var.num_instances}"
-  name                      = "${format(var.hostname_format, count.index + 1, data.google_client_config.current.region, local.cluster_name)}"
-  machine_type              = "${var.machine_type}"
+  count = var.num_instances
+  name = format(
+    var.hostname_format,
+    count.index + 1,
+    data.google_client_config.current.region,
+    local.cluster_name,
+  )
+  machine_type              = var.machine_type
   can_ip_forward            = false
-  zone                      = "${element(var.zone_list, count.index)}"
-  allow_stopping_for_update = "${var.allow_stopping_for_update}"
+  zone                      = element(var.zone_list, count.index)
+  allow_stopping_for_update = var.allow_stopping_for_update
 
   boot_disk {
     initialize_params {
-      image = "${coalesce(var.image, module.dcos-tested-oses.image_name)}"
-      type  = "${var.disk_type}"
-      size  = "${var.disk_size}"
+      image = coalesce(var.image, module.dcos-tested-oses.image_name)
+      type  = var.disk_type
+      size  = var.disk_size
     }
 
     auto_delete = true
   }
 
   network_interface {
-    subnetwork = "${var.instance_subnetwork_name}"
+    subnetwork = var.instance_subnetwork_name
 
-    access_config = {
+    access_config {
       // Ephemeral IP
     }
   }
 
-  tags = ["${concat(var.tags,list(format(var.hostname_format, count.index + 1, data.google_client_config.current.region, local.cluster_name), local.cluster_name))}"]
+  tags = concat(
+    var.tags,
+    [
+      format(
+        var.hostname_format,
+        count.index + 1,
+        data.google_client_config.current.region,
+        local.cluster_name,
+      ),
+      local.cluster_name,
+    ],
+  )
 
-  labels = "${merge(var.labels, map("name", format(var.hostname_format, (count.index + 1), data.google_client_config.current.region, local.cluster_name),
-                                    "cluster", local.cluster_name,
-                                    "kubernetescluster", local.cluster_name))}"
+  labels = merge(
+    var.labels,
+    {
+      "name" = format(
+        var.hostname_format,
+        count.index + 1,
+        data.google_client_config.current.region,
+        local.cluster_name,
+      )
+      "cluster"           = local.cluster_name
+      "kubernetescluster" = local.cluster_name
+    },
+  )
 
   metadata = {
-    user-data = "${var.user_data}"
+    user-data = var.user_data
     sshKeys   = "${coalesce(var.ssh_user, module.dcos-tested-oses.user)}:${file(var.public_ssh_key)}"
   }
 
   lifecycle {
-    ignore_changes = ["labels.name", "labels.cluster"]
+    ignore_changes = [
+      labels.name,
+      labels.cluster,
+    ]
   }
 
   scheduling {
-    preemptible = "${var.scheduling_preemptible}"
+    preemptible = var.scheduling_preemptible
 
     # it always needs to be "TERMINATE as soon as preemptible is set to true."
-    on_host_maintenance = "${var.scheduling_preemptible ? "TERMINATE" : local.on_host_maintenance}"
+    on_host_maintenance = var.scheduling_preemptible ? "TERMINATE" : local.on_host_maintenance
     automatic_restart   = "false"
   }
 
   guest_accelerator {
-    type  = "${var.guest_accelerator_type}"
-    count = "${var.guest_accelerator_count}"
+    type  = var.guest_accelerator_type
+    count = var.guest_accelerator_count
   }
 }
