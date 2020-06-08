@@ -24,7 +24,7 @@ variable "ssh_private_key_filename" {
 
 variable "zone_list" {
   description = "Element by zone list"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "image" {
@@ -62,14 +62,14 @@ variable "allow_stopping_for_update" {
 }
 
 variable "tags" {
-  type        = "list"
+  type        = list(string)
   description = "Add custom tags to all resources"
   default     = []
 }
 
 variable "labels" {
   description = "Add custom labels to all resources"
-  type        = "map"
+  type        = map(string)
   default     = {}
 }
 
@@ -97,3 +97,4 @@ variable "name_prefix" {
   description = "Name Prefix"
   default     = ""
 }
+
