@@ -65,17 +65,17 @@ output "allow_stopping_for_update" {
 
 output "private_ips" {
   description = "List of private ip addresses created by this module"
-  value       = [google_compute_instance.instances.*.network_interface.0.network_ip]
+  value       = google_compute_instance.instances.*.network_interface.0.network_ip
 }
 
 output "public_ips" {
   description = "List of public ip addresses created by this module"
-  value       = [google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip]
+  value       = google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip
 }
 
 output "instances_self_link" {
   description = "List of instance self links"
-  value       = [google_compute_instance.instances.*.self_link]
+  value       = google_compute_instance.instances.*.self_link
 }
 
 output "scheduling_preemptible" {
@@ -87,4 +87,3 @@ output "prereq_id" {
   description = "Prereq id used for dependency"
   value       = ""
 }
-
